@@ -649,21 +649,21 @@ $\therefore$ $(S \to L, \alpha', \gamma', S \to M)$ は Galois 接続．
 
 **✅ 具体的な値 $L$ と抽象的な値 $M$ との Galois 接続さえあれば**
 
-**具体的な環境(?) $\textbf{Var} \to L$ と**
-**抽象的な環境(?) $\textbf{Var} \to M$ の Galois 接続を設計できる！**
+**$\textbf{Var} \to L$ と**
+**$\textbf{Var} \to M$ の Galois 接続を設計できる！**
 
 ---
 
-<!-- _header: 具体的意味論と抽象的意味論の Galois 接続の構成 -->
+<!-- _header: 遷移の間の Galois 接続の構成 -->
 
-**✅ 多くの解析では意味関数による状態の遷移:**
+**✅ 多くの解析では状態の遷移:**
 
 $$
 (\textbf{Var} \to L) \to (\textbf{Var} \to L)
 $$
 
 
-**を扱う．これと抽象的意味関数による状態の遷移:**
+**を扱う．これと抽象状態の遷移:**
 $$
 (\textbf{Var} \to M) \to (\textbf{Var} \to M)
 $$
@@ -673,7 +673,7 @@ $$
 
 ---
 
-<!-- _header: 具体的意味論と抽象的意味論の Galois 接続の構成 -->
+<!-- _header: 遷移の間の Galois 接続の構成 -->
 
 
 <div class="thm" style="font-size: 0.75em;">
@@ -739,41 +739,73 @@ $$
 
 ---
 
-<!-- _header: 具体的意味論と抽象的意味論の Galois 接続の構成 -->
+<!-- _header: 遷移の間の Galois 接続の構成
+ -->
 
 ✅ **それぞれの状態 (の空間) の Galois 接続 から**
-**状態が $L_1 \to L_2$ に遷移する意味関数** **$\iff$ 抽象状態 $M_1 \to M_2$ の遷移** が構成できる！
+**$L_1 \to L_2$ の遷移** **$\iff$$M_1 \to M_2$ の遷移の Galois 接続** が構成できる！
 
 
 ---
 
+<!-- _header: Galois 接続の構成まとめ -->
+
+
+<div style="font-size: 0.75em;" class="columns">
+
+<!-- columns -->
+<div>
 
 <div class="box">
 
 <br>
 
-**値 $L$ と性質 $M$ の間の Galois 接続**
+**値 $L$ の記述 $\eta: L \to D$**
 
 </div>
 
 <div class="center">
 
-⇩
+⇩　extraction function
 
 </div>
-
 
 <div class="box">
 
 <br>
 
-**環境 $\textbf{Var} \to L$ と $\textbf{Var} \to M$ の Galois 接続:** (by Thm7)
+**値 $L$ と性質 $M$ の間の Galois 接続**  
+
 
 </div>
 
 <div class="center">
 
-⇩
+⇩ Thm 7
+
+</div>
+
+
+
+<div class="box">
+
+<br>
+
+**$\textbf{Var} \to L$ と $\textbf{Var} \to M$ の Galois 接続:** 
+
+</div>
+
+<!-- columns -->
+</div>
+
+<!-- columns -->
+<div>
+
+
+
+<div class="center">
+
+⇩ Thm 8
 
 </div>
 
@@ -781,9 +813,26 @@ $$
 
 <br>
 
-**具体的意味論** **$(\textbf{Var} \to L) \to (\textbf{Var} \to L)$ と
-抽象的意味論 $(\textbf{Var} \to M) \to (\textbf{Var} \to M)$ の Galois 接続** (by Thm8)
+**$(\textbf{Var} \to L) \to (\textbf{Var} \to L)$ と**
+**$(\textbf{Var} \to M) \to (\textbf{Var} \to M)$ の Galois 接続** 
+
 
 </div>
 
+<div class="center">
 
+⇩ Thm 7
+
+</div>
+
+<div class="box">
+
+<br>
+
+**$\textbf{Cmd} \to (\textbf{Var} \to L) \to (\textbf{Var} \to L)$ と**
+**$\textbf{Cmd} \to (\textbf{Var} \to M) \to (\textbf{Var} \to M)$ の Galois 接続**
+
+</div>
+
+</div>
+</div>
