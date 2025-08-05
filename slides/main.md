@@ -411,7 +411,7 @@ $$
 <!-- _header: 複数の解析結果の関係を表現する -->
 
 
-<div class="thm">
+<div class="thm" style="font-size: 0.85em">
 
 ### [Thm4: Galois 接続の直積 ②]
 
@@ -465,7 +465,7 @@ $$
 
 同じ値に対する複数の解析をまとめて扱うこともできる．
 
-<div class="thm" style="font-size: 0.85em;">
+<div class="thm" style="font-size: 0.85em">
 
 ### [Thm5: Galois 接続の直積 ③]
 
@@ -747,7 +747,6 @@ $$
 
 ---
 
-<!-- _header: 典型的な解析の Galois 接続の構成 -->
 
 <div class="box">
 
