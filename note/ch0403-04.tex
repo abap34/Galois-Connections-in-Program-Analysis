@@ -1,0 +1,1341 @@
+\documentclass[uplatex]{jsarticle}
+
+
+\usepackage[dvipdfmx]{graphicx, color}
+\usepackage{amsmath, amssymb}
+\usepackage[hyphens]{url}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+\usepackage{enumitem}
+\usepackage{accents}
+\usepackage{bm}
+\usepackage{romannum}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{fancybox}
+\usepackage{ascmac}
+\usetikzlibrary{positioning}
+
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable, skins, theorems}
+
+\usepackage{annotate-equations}
+
+% Custom command for indented proof sections with left border
+\newenvironment{proofpart}[1]
+  {\par\vspace{1em}\noindent\hspace{10pt}$\triangleright$\hspace{5pt}\textbf{#1}\\[0.3em]
+   \hspace{10pt}\begin{tcolorbox}[enhanced,
+     left=20pt, right=0pt, top=3pt, bottom=3pt,
+     colback=white,
+     colframe=white,
+     leftrule=0.3pt,
+     rightrule=0pt,
+     toprule=0pt,
+     bottomrule=0pt,
+     sharp corners,
+     boxsep=0pt,
+     before skip=0pt,
+     after skip=1em
+   ]}
+  {\end{tcolorbox}}
+
+% Custom paragraph command that starts on a new line
+\newcommand{\newlineparagraph}[1]{%
+  \par\vspace{0.5em}%
+  \noindent\textbf{#1}\\[0.3em]%
+  \noindent\ignorespaces%
+}
+
+
+
+\newtcbtheorem{boxtheorem}{定理}{enhanced,
+  attach boxed title to top left={xshift=5mm,yshift=-3mm},
+  boxed title style={colframe = lightgray!35!lightgray, colback = white},
+  coltitle = black,
+  colback = white,
+  colframe = lightgray!35!lightgray,
+  fonttitle = \bfseries,
+  breakable = true,
+  top = 4mm
+}{thm}
+
+\newtcbtheorem{boxproof}{証明}{enhanced,
+  attach boxed title to top left={xshift=5mm,yshift=-3mm},
+  boxed title style={colframe = lightgray!35!lightgray, colback = white},
+  coltitle = black,
+  colback = white,
+  colframe = lightgray!35!lightgray,
+  fonttitle = \bfseries,
+  breakable = true,
+  top = 4mm
+}{prf}
+
+\newtcbtheorem{boxdefinition}{定義}{enhanced,
+attach boxed title to top left={xshift=5mm,yshift=-3mm},
+boxed title style={colframe = lightgray!35!lightgray, colback = white},
+coltitle = black,
+colback = white,
+colframe = lightgray!35!lightgray,
+fonttitle = \bfseries,
+breakable = true,
+top = 4mm
+}{def}
+
+\newtcbtheorem{boxlemma}{補題}{
+  enhanced,
+  attach boxed title to top left={xshift=5mm,yshift=-3mm},
+  boxed title style={colframe=lightgray!35, colback=white},
+  coltitle=black, colback=white, colframe=lightgray!35,
+  fonttitle=\bfseries, breakable, top=4mm
+}{lem}
+
+
+\newtcbtheorem{boxproposition}{予想}{
+  enhanced,
+  attach boxed title to top left={xshift=5mm,yshift=-3mm},
+  boxed title style={colframe=lightgray!35, colback=white},
+  coltitle=black, colback=white, colframe=lightgray!35,
+  fonttitle=\bfseries, breakable, top=4mm
+}{prop}
+
+
+\newtcbtheorem{boxcorollary}{系}{
+  enhanced,
+  attach boxed title to top left={xshift=5mm,yshift=-3mm},
+  boxed title style={colframe=lightgray!35, colback=white},
+  coltitle=black, colback=white, colframe=lightgray!35,
+  fonttitle=\bfseries, breakable, top=4mm
+}{cor}
+
+
+\newtcbtheorem{boxexample}{例}{
+  enhanced,
+  attach boxed title to top left={xshift=5mm,yshift=-3mm},
+  boxed title style={colframe=lightgray!35, colback=white},
+  coltitle=black, colback=white, colframe=lightgray!35,
+  fonttitle=\bfseries, breakable, top=4mm
+}{ex}
+
+
+\renewcommand{\proofname}{\textbf{証明}}
+\everymath{\displaystyle}
+
+\lstset{
+  basicstyle={\ttfamily},
+  identifierstyle={\small},
+  commentstyle={\smallitshape},
+  keywordstyle={\small\bfseries},
+  ndkeywordstyle={\small},
+  stringstyle={\small\ttfamily},
+  frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},
+  numbers=left,
+  xrightmargin=0zw,
+  xleftmargin=3zw,
+  numberstyle={\scriptsize},
+  stepnumber=1,
+  numbersep=1zw,
+  lineskip=-0.5ex
+}
+
+\title{Galois 接続とプログラム解析}
+\author{山口悠地}
+\date{2025年 7月}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+\section{Galois 接続}
+
+\subsection{定義}
+
+\begin{boxdefinition}{Galois 接続}{galois-connection}
+  半順序集合 $(L, \leq_L)$ と $(M, \leq_M)$
+  と $\alpha: L \to M$ と $\gamma: M \to L$ が次の条件を満たすとき $(L, \alpha, \gamma, M)$ は \textbf{Galois 接続} であるという．
+  \begin{enumerate}
+    \item $\alpha$, $\gamma$ は単調.
+    \item 任意の $l \in L, m \in M$ に対して $l \leq_L \gamma(\alpha(l))$ かつ $\alpha(\gamma(m)) \leq_M m$.
+  \end{enumerate}
+\end{boxdefinition}
+
+\paragraph*{プログラム解析における Galois 接続の直感的な理解}
+
+ざっくり直感的な説明を述べる．
+
+プログラム解析は，常にいくらでも具体的なものに対してできるとは限らない．
+
+例えば以下のプログラムの終了時に \lstinline|z| がとる値について何らかの解析を行うことを考える．
+
+\begin{lstlisting}
+  x = 1;
+  y = 2;
+  if rand()
+    z = x + y;
+  else
+    z = x - y;
+  end
+\end{lstlisting}
+
+最も理想的には値の集合: $\{-1, 3\}$ を解析結果として得たい．
+しかし，一般的にこのような具体的な値 (この例では (= $\mathcal{P}(\mathbb{Z})$)) を
+得るのは計算コストが高かったり，あるいはそもそも不可能であることが多い．
+
+そこで，これまで見てきたように \textbf{ほどよい性質まで抽象化する}ことによって計算を可能にしてきた．
+例えば
+
+\begin{itemize}
+  \item 偶奇のみを考える
+  \item 区間のみを考える
+  \item データ型のみを考える
+\end{itemize}
+
+などである．
+
+\textbf{Galois 接続はこのような抽象化と具体化の関係を表すものといえる．}
+
+定義における $L$ が具体的な値の集合と対応し， $M$ が抽象的な値の集合と対応する．
+つまり $\alpha$ は「抽象化」を行う関数，最も典型的にはプログラムの値の集合を抽象化した性質に写す関数である．
+そして $\gamma$ は「具体化」を行う関数であり，抽象的な性質を具体的な値に写す．
+これらを使って解析を容易に行える抽象的な領域で解析を行うわけである．
+ここからは具体例および諸性質の理解を通して条件の確認・直感的な解釈を与える．
+
+
+\subsection{Galois 接続の例}
+\label{ex:galois-connection-example}
+
+整数のべき集合と整数の区間の間の Galois 接続を考えることができる.
+
+$L = (\mathcal{P}(\mathbb{Z}), \subseteq)$,
+$M = (\textbf{Interval}, \leq_i)$ とする.
+
+(\textbf{Interval} の定義は \textbf{Example 4.10} を参照のこと．)
+
+そして
+
+\begin{align*}
+  \gamma(m) & = \{ z \in \mathbb{Z} \mid \mathrm{inf}(m) \leq z \leq \mathrm{sup}(m) \} \\
+  \alpha(l) & = \begin{cases}
+                  \bot \quad                           & \text{if } l = \emptyset \\
+                  [\mathrm{inf'}(l), \mathrm{sup'}(l)] & \text{otherwise}
+                \end{cases}
+\end{align*}
+
+と定める．
+
+例えば
+
+\begin{itemize}
+  \item $\gamma([1, 5]) = \{ 1, 2, 3, 4, 5 \}$
+  \item $\gamma([1, \infty)) = \{ z \in \mathbb{Z} \mid z \geq 1 \}$
+  \item $\gamma(\bot) = \emptyset$
+  \item $\alpha(\{ 1, 2, 3 \}) = [1, 3]$
+  \item $\alpha(\{1, 4, 5\}) = [1, 5]$
+  \item $\alpha(\{2z \mid z > 0\}) = [-\infty, 0]$
+  \item $\alpha(\emptyset) = \bot$
+\end{itemize}
+
+
+このとき， $(L, \alpha, \gamma, M)$ は Galois 接続である．
+
+まず， $\gamma$ の単調性: $m_1 \leq_i m_2 \implies \gamma(m_1) \subseteq \gamma(m_2)$ から確認する．
+
+\begin{align*}
+  m_1 \leq_i m_2 & \implies \mathrm{inf}(m_2) \leq \mathrm{inf}(m_1) \land \mathrm{sup}(m_1) \leq \mathrm{sup}(m_2)
+                 & \text{(Definition of $\leq_i$)}                                                                                                                                                       \\
+                 & \implies \forall z \in \{ z \in \mathbb{Z} \mid \mathrm{inf}(m_1) \leq z \leq \mathrm{sup}(m_1) \}, z \in \{ z \in \mathbb{Z} \mid \mathrm{inf}(m_2) \leq z \leq \mathrm{sup}(m_2) \}
+                 & \text{(Transitivity of $\leq$)}                                                                                                                                                       \\
+                 & \implies \gamma(m_1) \subseteq \gamma(m_2)
+\end{align*}
+
+となり単調．
+
+$\alpha$ の単調性: $l_1 \subseteq l_2 \implies \alpha(l_1) \leq_i \alpha(l_2)$ も確認しよう．
+
+
+% $l_1 \subseteq l_2$ のとき $\inf'(l_1) \leq \inf'(l_2)$ である．
+
+% なぜなら $\inf'(l)$ は $l$ の最小元または最小元がないときは $-\infty$ で，
+
+% - $l_1$ に最小元になくて $l_2$ にあるときはない
+% - $l_1$ にも $l_2$ にも最小元ないときは どっちも $-\infty$ で， $\leq$ の反射律から ok.
+% - $l_1$ に最小元があって $l_2$ にないときは $\inf'(l_1) \leq \inf'(l_2)$ になる
+% - $l_1$ にも $l_2$ にも最小元があるときは $\inf'(l_1) > \inf'(l_2)$ とするとそのような元は $l_2$ に含まれないから仮定に矛盾する．
+
+\begin{align*}
+  l_1 \subseteq l_2 & \implies \mathrm{inf'}(l_2) \leq \mathrm{inf'}(l_1) \land \mathrm{sup'}(l_1) \leq \mathrm{sup'}(l_2) \\
+                    & \implies \alpha(l_1) \leq_i \alpha(l_2)
+\end{align*}
+
+より単調である．
+
+
+続いて任意の $l \in L, m \in M$ に対して $l \subseteq \gamma(\alpha(l))$ かつ $\alpha(\gamma(m)) \leq_i m$ なることを示す．
+
+まず $l \subseteq \gamma(\alpha(l))$ を示す．
+
+\begin{itemize}
+  \item $l = \emptyset$ のとき: $\gamma(\alpha(l)) = \gamma(\bot) = \emptyset \subseteq l$.
+  \item $l \neq \emptyset$ のとき:
+        \begin{align*}
+          \gamma(\alpha(l)) & = \gamma\left( \left[ \mathrm{inf'}(l), \mathrm{sup'}(l) \right] \right)    \\
+                            & = \{ z \in \mathbb{Z} \mid \mathrm{inf'}(l) \leq z \leq \mathrm{sup'}(l) \} \\
+                            & \supseteq \{ z \in \mathbb{Z} \mid z \in l \}                               \\
+                            & = l
+        \end{align*}
+\end{itemize}
+
+また $\alpha(\gamma(m)) \leq m$ は
+
+\begin{itemize}
+  \item $m = \bot$ のとき $\alpha(\gamma(m)) = \alpha(\emptyset) = \bot \leq m$
+  \item $m = \left[ m_1, m_2 \right] \neq \bot$ のとき:
+        \begin{align*}
+          \alpha(\gamma(m)) & = \alpha \left( \{ z \in \mathbb{Z} \mid m_1 \leq z \leq m_2 \} \right) \\
+                            & = \left[ m_1, m_2 \right]                                               \\
+                            & = m                                                                     \\
+                            & \leq m
+        \end{align*}
+
+
+        よって $(L, \alpha, \gamma, M)$ は Galois 接続である．
+
+\end{itemize}
+
+\subsection{随伴}
+
+定義 \ref{def:galois-connection} と同値な定義を使うと便利なことがある．
+
+\begin{boxdefinition}{随伴}{adjoint-functor}
+  半順序集合 $(L, \leq_L)$ と $(M, \leq_M)$ について全域関数
+  $\alpha: L \to M$ と $\gamma: M \to L$ が次の条件を満たすとき $(L, \alpha, \gamma, M)$ を \textbf{随伴} であるという．
+  $$
+    \alpha(l) \leq_M m \iff l \leq_L \gamma(m)
+  $$
+\end{boxdefinition}
+
+次が成り立つ．
+
+\begin{boxtheorem}{Galois 接続と随伴の関係}{galois-adjoint}
+  $(L, \alpha, \gamma, M)$ が Galois 接続のとき，またそのときに限り $(L, \alpha, \gamma, M)$ は随伴である．
+\end{boxtheorem}
+
+\paragraph*{証明}
+
+\begin{proofpart}{(Galois 接続 $\implies$ 随伴)}
+
+  \begin{align*}
+    \alpha(l) \leq_M m
+     & \implies \gamma(\alpha(l)) \leq_L \gamma(m)
+     &                                                      & \text{(monotonicity of $\gamma$)}        \\
+     & \implies l \leq_L \gamma(\alpha(l)) \leq_L \gamma(m)
+     &                                                      & \text{(definition of Galois connection)} \\
+     & \implies l \leq_L \gamma(m)
+     &                                                      & \text{(transitivity of $\leq_L$)}
+  \end{align*}
+
+
+  また
+
+  \begin{align*}
+    l \leq_L \gamma(m)
+     & \implies \alpha(l) \leq_M \alpha(\gamma(m))
+     &                                                      & \text{(monotonicity of $\alpha$)}        \\
+     & \implies \alpha(l) \leq_M m \leq_M \alpha(\gamma(m))
+     &                                                      & \text{(definition of Galois connection)} \\
+     & \implies \alpha(l) \leq_M m
+     &                                                      & \text{(transitivity of $\leq_M$)}
+  \end{align*}
+
+\end{proofpart}
+
+\begin{proofpart}{(随伴 $\implies$ Galois 接続)}
+
+  まず条件 2 について示そう.
+
+  $l \in L$ に対して:
+
+  \begin{align*}
+     & l \leq_L l
+     &                                     & \text{(reflexivity of $\leq_L$)}                                      \\
+     & \alpha(l) \leq_M \alpha(l)
+     &                                     & \text{(reflexivity of $\leq_M$)}                                      \\
+     & \implies l \leq_L \gamma(\alpha(l))
+     &                                     & \text{(assumption: $\alpha(l) \leq_M m \implies l \leq_L \gamma(m)$)} \\
+  \end{align*}
+
+  となり， $l \leq_L \gamma(\alpha(l))$ が成立.
+
+  同様に， $m \in M$ に対して:
+
+  \begin{align*}
+     & m \leq_M m
+     &                                     & \text{(reflexivity of $\leq_M$)}                                      \\
+     & \gamma(m) \leq_L \gamma(m)
+     &                                     & \text{(reflexivity of $\leq_L$)}                                      \\
+     & \implies \alpha(\gamma(m)) \leq_M m
+     &                                     & \text{(assumption: $l \leq_L \gamma(m) \implies \alpha(l) \leq_M m$)} \\
+  \end{align*}
+
+  で， $\alpha(\gamma(m)) \leq_M m$ となる．
+
+  続いて， 条件 1 (単調性) を示す．
+
+
+  $\alpha$ の単調性: $l_1 \leq_L l_2$ のとき $\alpha(l_1) \leq_M \alpha(l_2)$ は
+
+  \begin{align*}
+    l_1 \leq_L l_2
+     & \implies l_1 \leq_L l_2 \leq_L \gamma(\alpha(l_2))
+     & \text{($l \leq_L \gamma(\alpha(l))$)}                                 \\
+     & \implies \alpha(l_1) \leq_M \alpha(l_2)
+     & \text{(assumption: $\alpha(l) \leq_M m \implies l \leq_L \gamma(m)$)} \\
+  \end{align*}
+
+  となりしたがう．
+
+  同様に $\gamma$ の単調性: $m_1 \leq_M m_2$ のとき $\gamma(m_1) \leq_L \gamma(m_2)$ は
+
+  \begin{align*}
+    m_1 \leq_M m_2
+     & \implies m_1 \leq_M m_2 \leq_M \alpha(\gamma(m_2))
+     & \text{($m \leq_M \alpha(\gamma(m))$)}                                 \\
+     & \implies \gamma(m_1) \leq_L \gamma(m_2)
+     & \text{(assumption: $l \leq_L \gamma(m) \implies \alpha(l) \leq_M m$)} \\
+  \end{align*}
+
+\end{proofpart}
+
+\qed
+
+\subsection{Galois 接続と Representation Function}
+
+集合 $V$ と 完備束 $(L, \leq_L)$ について
+Repersentation Function $\beta: V \to L$ から Galois 接続を構成することができる．
+
+\begin{boxtheorem}{Representation Function と Galois 接続}{representation-function-galois-connection}
+  集合 $V$， 完備束 $(L, \leq_L)$ と $\beta: V \to L$ について
+
+  $\alpha: \mathcal{P}(V) \to L$ と $\gamma: L \to \mathcal{P}(V)$ を次のように定義する．
+
+  \begin{align*}
+    \alpha(V') & = \bigsqcup_{v \in V'} \beta(v)        \\
+    \gamma(l)  & = \{ v \in V \mid \beta(v) \leq_L l \}
+  \end{align*}
+
+  このとき $(\mathcal{P}(V), \subseteq)$, $(L, \leq_L)$ は半順序であって，
+  $(L, \alpha, \gamma, \mathcal{P}(V))$ は Galois 接続である．
+\end{boxtheorem}
+
+\paragraph*{証明}
+
+随伴であることを示すことにより Galois 接続であることを示す．
+
+$(L, \leq_L)$ は完備束なので $\alpha$ は全域関数．
+また， Representation Function なので $\beta$ は全域．したがって $\gamma$ も全域なことがしたがう．
+
+そして
+
+\begin{align*}
+  \alpha(V') \leq_L l
+   & \iff \bigsqcup_{v \in V'} \beta(v) \leq_L l
+   &                                             & \text{(definition of $\alpha$)}  \\
+   & \iff \forall v \in V', \beta(v) \leq_L l
+   &                                             & \text{(property of $\bigsqcup$)} \\
+   & \iff V' \subseteq \gamma(l)
+   &                                             & \text{(definition of $\gamma$)}  \\
+\end{align*}
+
+
+よって 定理 \ref{thm:galois-adjoint} より
+$(\mathcal{P}(V), \alpha, \gamma, L)$ は Galois 接続である．
+
+\qed
+
+\subsubsection{extraction function}
+
+とくに \textbf{extraction function} という例を考えることができる．
+
+集合 $V, D$ と $\eta: V \to D$ を考える．
+$V$, $D$ はとくに半順序集合などに限定されていないことに注意せよ．
+
+定理 \ref{thm:representation-function-galois-connection} において
+
+\begin{align*}
+   & V \leftarrow V                                      \\
+   & L \leftarrow \mathcal{P}(D)                         \\
+   & \leq_L \leftarrow \subseteq                         \\
+   & \beta \leftarrow v \mapsto \left\{ \eta(v) \right\}
+\end{align*}
+
+とすると 半順序集合 $(\mathcal{P}(V), \subseteq)$ と $(\mathcal{P}(D), \subseteq)$ は
+
+\begin{align*}
+  \alpha(V') & = \bigcup_{v \in V'} \left\{ \eta(v) \right\} \\
+             & = \{ \eta(v) \mid v \in V' \}                 \\
+  \gamma(D') & = \{ v \in V \mid \eta(v) \in D' \}
+\end{align*}
+
+によって Galois 接続 $(\mathcal{P}(V), \alpha, \gamma, \mathcal{P}(D))$ をなすことがわかる．
+
+この値 $v$ を抽象的な記述 $d$ に写す $\eta$ を \textit{extraction function} と呼ぶ．
+
+実際の問題の例で考えよう．
+
+
+$V = \mathbb{Z}$, $D = \{ \mathord{-}, 0, \mathord{+} \}$ として
+
+$\operatorname{sign}: \mathbb{Z} \to D$ を次のように定義する．
+
+$$
+  \operatorname{sign}(z) = \begin{cases}
+    \mathord{-} & \text{if } z < 0 \\
+    0           & \text{if } z = 0 \\
+    \mathord{+} & \text{if } z > 0
+  \end{cases}
+$$
+
+
+と定める．
+
+このとき， 先ほどの議論から
+
+\begin{align*}
+  \alpha_{\operatorname{sign}}(V') & = \{ \operatorname{sign}(v) \mid z \in V' \}                \\
+  \gamma_{\operatorname{sign}}(D') & = \{ z \in \mathbb{Z} \mid \operatorname{sign}(z) \in D' \}
+\end{align*}
+
+とすると $(\mathcal{P}(\mathbb{Z}), \alpha_{\operatorname{sign}}, \gamma_{\operatorname{sign}}, \mathcal{P}(D))$ は Galois 接続.
+
+実際に計算例を見ると:
+
+\begin{align*}
+   & \alpha_{\operatorname{sign}}(\{-1 \})          = \{ \operatorname{sign}(-1) \}                                                           = \{-\}                                \\
+   & \alpha_{\operatorname{sign}}(\{-1, 0, 1\})     = \{ \operatorname{sign}(-1), \operatorname{sign}(0), \operatorname{sign}(1) \}           = \{-, 0, +\}                          \\
+   & \alpha_{\operatorname{sign}}(\{-2, 0, 3, 4\})  = \{ \operatorname{sign}(-2), \operatorname{sign}(0), \operatorname{sign}(3) \}           = \{-, 0, +\}                          \\
+   & \gamma_{\operatorname{sign}}(\{-\})            = \{ z \in \mathbb{Z} \mid \operatorname{sign}(z) = - \}                                  = \{ z \in \mathbb{Z} \mid z < 0 \}    \\
+   & \gamma_{\operatorname{sign}}(\{-, 0\})         = \{ z \in \mathbb{Z} \mid \operatorname{sign}(z) = - \lor \operatorname{sign}(z) = 0 \}  = \{ z \in \mathbb{Z} \mid z \leq 0 \} \\
+\end{align*}
+
+
+\subsection{Galois 接続の性質}
+
+\begin{boxtheorem}{}{galois-connection-circ-identity}
+  半順序集合 $(L, \leq_L)$ と $(M, \leq_M)$ と
+  $\alpha: L \to M$ と $\gamma: M \to L$ が Galois 接続 $(L, \alpha, \gamma, M)$ をなすとき
+  \begin{align*}
+    \alpha \circ \gamma \circ \alpha & = \alpha \\
+    \gamma \circ \alpha \circ \gamma & = \gamma
+  \end{align*}
+\end{boxtheorem}
+
+\paragraph*{証明}
+
+\begin{align*}
+           & l \leq_L \gamma(\alpha(l))
+           &                                            & \text{(Definition of Galois connection)} \\
+  \implies & \alpha(l) \leq_M \alpha(\gamma(\alpha(l)))
+           &                                            & \text{(Monotonicity of $\alpha$)}        \\
+\end{align*}
+
+また
+
+\begin{align*}
+           & \gamma(\alpha(l)) \leq_L \gamma(\alpha(l))
+           &                                            & \text{(Reflexivity of $\leq_L$)}          \\
+  \implies & \alpha(\gamma(\alpha(l))) \leq_M \alpha(l)
+           &                                            & \text{(Theorem \ref{thm:galois-adjoint})} \\
+\end{align*}
+
+なので $\leq_M$ の反対称性から $\alpha(l) = \alpha(\gamma(\alpha(l)))$
+
+同様に
+
+\begin{align*}
+           & \alpha(\gamma(m)) \leq_M m
+           &                                            & \text{(Definition of Galois connection)} \\
+  \implies & \gamma(m) \leq_L \gamma(\alpha(\gamma(m)))
+           &                                            & \text{(Monotonicity of $\gamma$)}        \\
+\end{align*}
+
+また
+
+\begin{align*}
+           & \alpha(\gamma(m)) \leq_M \alpha(\gamma(m))
+           &                                            & \text{(Reflexivity of $\leq_M$)}          \\
+  \implies & \gamma(\alpha(\gamma(m))) \leq_L \gamma(m)
+           &                                            & \text{(Theorem \ref{thm:galois-adjoint})} \\
+\end{align*}
+
+となり $\leq_L$ の反対称性から $\gamma(m) = \gamma(\alpha(\gamma(m)))$．
+
+\qed
+
+
+\begin{boxlemma}{$\alpha$ の上界の保存性}{galois-connection-upper-bound}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$ と $\alpha: L \to M$ について
+  Galois 接続 $(L, \alpha, \gamma, M)$ が存在するとき，任意の $L' \subseteq L$, $m \in M$ について
+
+  $$
+    \alpha\left( \bigsqcup_{l \in L'} l \right) \leq_M m \iff
+    \bigsqcup_{l \in L'} \alpha(l) \leq_M m
+  $$
+\end{boxlemma}
+
+\paragraph*{証明}
+
+\begin{align*}
+  \alpha\left( \bigsqcup_{l \in L'} l \right) \leq_M m
+   & \iff \bigsqcup_{l \in L'} l \leq_L \gamma(m)
+   &                                              & \text{(Theorem \ref{thm:galois-adjoint})} \\
+   & \iff \forall l \in L', l \leq_L \gamma(m)
+   &                                              & \text{(property of $\bigsqcup$)}          \\
+   & \iff \forall l \in L', \alpha(l) \leq_M m
+   &                                              & \text{(Theorem \ref{thm:galois-adjoint})} \\
+   & \iff \bigsqcup_{l \in L'} \alpha(l) \leq_M m
+\end{align*}
+
+\qed
+
+ここから次の性質が従う．
+
+\begin{boxlemma}{$\alpha$ の完全加法性}{galois-connection-complete-additivity}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$ と $\alpha: L \to M$ について
+  Galois 接続 $(L, \alpha, \gamma, M)$ が存在するとき， $\alpha$ は完全加法的である．
+  すなわち，任意の $L' \subseteq L$ について
+
+  $$\alpha\left( \bigsqcup_{l \in L'} l \right) = \bigsqcup_{l \in L'} \alpha(l)
+  $$
+\end{boxlemma}
+
+\paragraph*{証明}
+
+補題1 において，とくに $m \leftarrow \bigsqcup_{l \in L'} \alpha(l)$ と $m \leftarrow \alpha\left( \bigsqcup_{l \in L'} l \right)$ とすると
+$\leq_M$ の反対称性からしたがう.
+
+% \url{https://lapisla.net/view?id=6162617033342f706f7365744034}
+
+これらの補題から，以下の重要な性質を得ることができる．
+
+
+\begin{boxtheorem}{$\alpha$ による $\gamma$ の決定}{galois-connection-uniqueness}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$, $\alpha: L \to M$ について
+  Galois 接続 $(L, \alpha, \gamma, M)$ が存在するとき $\gamma$ は
+
+  $$
+    \gamma(m) = \bigsqcup \{ l \in L \mid \alpha(l) \leq_M m \}
+  $$
+
+  によって一意に定まる．
+\end{boxtheorem}
+
+\paragraph*{証明}
+
+\begin{proofpart}{(一意性)}
+
+  $\gamma_1, \gamma_2$ が Galois 接続 $(L, \alpha, \gamma_1, M)$ と $(L, \alpha, \gamma_2, M)$ をなすとき， $\gamma_1 = \gamma_2$ であることを示す．
+
+  Galois 接続の定義から
+
+  \begin{align}
+    \alpha(\gamma_1(m)) \leq_M m \\
+    \alpha(\gamma_2(m)) \leq_M m
+  \end{align}
+
+  定理 \ref{thm:galois-adjoint} を
+  (1) に対して $\gamma \leftarrow \gamma_2$,
+  (2) に対して $\gamma \leftarrow \gamma_1$ として使うと
+
+
+  \begin{align*}
+    \gamma_1(m) \leq_M \gamma_2(m) \\
+    \gamma_2(m) \leq_M \gamma_1(m)
+  \end{align*}
+
+  となり $\gamma_1(m) = \gamma_2(m)$ がしたがう．
+
+\end{proofpart}
+
+\begin{proofpart}{($\gamma$ の正当性)}
+
+  $\gamma(m) = \bigsqcup \{ l \in L \mid \alpha(l) \leq_M m \}$ が条件:
+
+  \begin{enumerate}
+    \item 単調性
+    \item 任意の $l \in L, m \in M$ に対して $l \leq_L \gamma(\alpha(l))$ かつ $\alpha(\gamma(m)) \leq_M m$
+  \end{enumerate}
+
+  なることを示す．
+
+  まず単調性:
+
+  $m_1 \leq_M m_2 \implies \gamma(m_1) \leq_M \gamma(m_2)$ を示す．
+
+  $m_1 \leq_M m_2$ のとき， $\leq_M$ が推移的であることに注意すれば
+
+  $$
+    \{ l \in L \mid \alpha(l) \leq_M m_1 \} \subseteq \{ l \in L \mid \alpha(l) \leq_M m_2 \}
+  $$
+
+  さらに
+
+  $(M, \leq_M)$ の $\bigsqcup$ の性質: $a \subseteq b \implies \bigsqcup a \leq_M \bigsqcup b$ を使うと
+
+  $$
+    \gamma(m_1) = \bigsqcup \{ l \in L \mid \alpha(l) \leq_M m_1 \} \leq_M
+    \bigsqcup \{ l \in L \mid \alpha(l) \leq_M m_2 \} = \gamma(m_2)
+  $$
+
+
+  となって単調性がしたがう.
+
+  続いて，任意の $l \in L, m \in M$ に対して $l \leq_L \gamma(\alpha(l))$ かつ $\alpha(\gamma(m)) \leq_M m$ なることを示す．
+
+
+  まず $l \leq_L \gamma(\alpha(l))$ は
+
+  $$
+    \gamma(\alpha(l)) = \bigsqcup \{ l' \in L \mid \alpha(l') \leq_M \alpha(l) \} \ni l
+  $$
+
+  よって $\bigsqcup$ の定義から $l \leq_L \gamma(\alpha(l))$ がしたがう．
+
+
+  つぎに $\alpha(\gamma(m)) \leq_M m$ を示す．
+
+
+  \begin{align*}
+    \bigsqcup \{ \alpha(l) \mid l \in L, \alpha(l) \leq_M m \}               & \leq_M m
+                                                                             & \text{(Property of $\bigsqcup$)}                       \\
+    \iff \gamma(m) = \alpha(\bigsqcup \{ l \in L \mid \alpha(l) \leq_M m \}) & \leq_M m
+                                                                             & \text{(Lemma \ref{lem:galois-connection-upper-bound})} \\
+  \end{align*}
+
+
+  以上から $\gamma(m) = \bigsqcup \{ l \in L \mid \alpha(l) \leq_M m \}$ によって一意に $\gamma$ が定まり
+  $(L, \alpha, \gamma, M)$ は Galois 接続．
+
+\end{proofpart}
+
+\qed
+
+同様の議論によって次の事実も得られる．
+
+\begin{boxtheorem}{$\gamma$ の完全乗法性}{galois-connection-complete-multiplicativity}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$ と $\gamma: M \to L$ について
+  Galois 接続 $(L, \alpha, \gamma, M)$ が存在するとき， $\gamma$ は完全乗法的である．
+  すなわち，任意の $M' \subseteq M$ について
+
+  $$
+    \gamma\left( \bigsqcap_{m \in M'} m \right) = \bigsqcap_{m \in M'} \gamma(m)
+  $$
+\end{boxtheorem}
+
+\begin{boxtheorem}{$\gamma$ による $\alpha$ の決定}{galois-connection-uniqueness2}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$, $\gamma: M \to L$ について
+  Galois 接続 $(L, \alpha, \gamma, M)$ が存在するとき $\alpha$ は
+
+  $$
+    \alpha(l) = \bigsqcup \{ m \in M \mid l \leq_L \gamma(m) \}
+  $$
+
+  によって一意に定まる．
+\end{boxtheorem}
+
+さらに，補題 \ref{lem:galois-connection-complete-additivity} の逆も成立する．
+
+\begin{boxtheorem}{完全加法性とGalois 接続の存在条件}{galois-connection-existence}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$ と $\alpha: L \to M$ について
+  $\alpha$ が完全加法的であるとき， Galois 接続 $(L, \alpha, \gamma, M)$ が存在する．
+\end{boxtheorem}
+
+\paragraph*{証明}
+
+
+$\gamma: M \to L$ を
+$\gamma(m) = \bigsqcup \{ l \in L \mid \alpha(l) \leq_M m \}$ によって定めて，これが
+Galois 接続 $(L, \alpha, \gamma, M)$ をなすことを示す．
+
+まず $\alpha$ の単調性を示そう． $l_1 \leq_L l_2$ のとき
+
+\begin{align*}
+  \alpha(l_2) & = \alpha( \bigsqcup \{l_1, l_2\} )         \\
+              & = \bigsqcup \{ \alpha(l_1), \alpha(l_2) \}
+              & \text{(Complete additivity of $\alpha$)}   \\
+              & \geq_M \alpha(l_1)
+              & \text{(Property of $\bigsqcup$)}
+\end{align*}
+
+
+$\gamma$ の単調性と $l \in L$ に対して $l \leq_L \gamma(\alpha(l))$ であることは定理 \ref{thm:galois-connection-uniqueness} と同様に示せる．
+
+あとは任意の $m \in M$ に対して $\alpha(\gamma(m)) \leq_M m$ なることを示せばよい．
+
+$l \in L, m \in M$ に対して
+
+\begin{align*}
+  \alpha(\gamma(m)) & = \alpha\left( \bigsqcup \{ l' \in L \mid \alpha(l') \leq_M m \} \right)
+                    & \text{(Definition of $\gamma$)}                                          \\
+                    & = \bigsqcup \{ \alpha(l') \mid l' \in L, \alpha(l') \leq_M m \}
+                    & \text{(Complete additivity of $\alpha$)}                                 \\
+                    & \leq_M m
+\end{align*}
+
+
+したがって $(L, \alpha, \gamma, M)$ は Galois 接続である．
+
+\qed
+
+
+同様の議論によって次も成立する．
+
+\begin{boxtheorem}{完全乗法性とGalois 接続の存在条件}{galois-connection-existence2}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$ と $\gamma: M \to L$ について
+  $\gamma$ が完全乗法的であるとき， Galois 接続 $(L, \alpha, \gamma, M)$ が存在する．
+\end{boxtheorem}
+
+\subsection{正当性関係との関係}
+
+4.10 節で議論した正当性関係 $R$ は以下のようなものであった．
+
+値 $V$ と 性質 $L$ の二項関係であって, $v \in V, l_1, l_2 \in L, L' \subseteq L$ に対して
+
+\begin{align}
+  v \mathrel R l_1 \land l_1 \sqsubseteq l_2 \implies v \mathrel R l_2 \label{eq:validity-1} \\
+  \forall l' \in L', v \mathrel R l' \implies v \mathrel R \left( \bigsqcup L' \right) \label{eq:validity-2}
+\end{align}
+
+ここで，より抽象的な領域 $M$ についてこの正当性関係をどう扱えるかを考察する．
+
+次のように $V$ と $M$ の二項関係 $S$ を定義する．
+
+\begin{boxdefinition}{抽象領域における正当性関係}{abstract-validity-relation}
+  Galois 接続 $(L, \alpha, \gamma, M)$ が与えられたとき， $V$, $M$ の二項関係 $S$ を次のように定義する．
+  $v \in V, m \in M$ に対して
+
+  $$
+    v \mathrel S m \iff v \mathrel R \gamma(m)
+  $$
+\end{boxdefinition}
+
+このとき， \textbf{$S$ もまた正当性関係} である．
+
+\begin{boxtheorem}{Galois 接続と正当性関係}{galois-validity-relation}
+  $S$ は正当性関係である．すなわち，
+  $v \in V, m_1, m_2 \in M, M' \subseteq M$ に対して
+
+  \begin{align}
+    v \mathrel S m_1 \land m_1 \leq_M m_2 & \implies v \mathrel S m_2 \label{eq:validity-3}                         \\
+    \forall m \in M', v \mathrel S m      & \implies v \mathrel S \left( \bigsqcap M' \right) \label{eq:validity-4}
+  \end{align}
+
+
+\end{boxtheorem}
+
+(\ref{eq:validity-3}):
+
+\begin{align*}
+  v \mathrel S m_1 \land m_1 \leq_M m_2 & \implies v \mathrel R \gamma(m_1) \land \gamma(m_1) \leq_L \gamma(m_2)
+                                        & \text{(Definition of $S$, monotonicity of $\gamma$)}                   \\
+                                        & \implies v \mathrel R \gamma(m_2)
+                                        & \text{(\ref{eq:validity-1})}                                           \\
+                                        & \implies v \mathrel S m_2
+                                        & \text{(Definition of $S$)}
+\end{align*}
+
+
+(\ref{eq:validity-4}):
+
+\begin{align*}
+  \forall m \in M', v \mathrel S m & \implies \forall m \in M', v \mathrel R \gamma(m)
+                                   & \text{(Definition of $S$)}                                                                         \\
+                                   & \implies v \mathrel R \left( \bigsqcap_{m \in M'} \gamma(m) \right)
+                                   & \text{(Definition of $R$: $v \mathrel R l_1 \land l_1 \sqsubseteq l_2 \implies v \mathrel R l_2$)} \\
+                                   & \implies v \mathrel R \gamma \left( \bigsqcap M' \right)
+                                   & \text{(Complete multiplicativity of $\gamma$)}                                                     \\
+                                   & \implies v \mathrel S \left( \bigsqcap M' \right)
+                                   & \text{(Definition of $S$)}
+\end{align*}
+
+\subsection{Galois 挿入}
+
+ここまで， Galois 接続がプログラム解析の正当性を保ったまま適切に抽象化するような構造であることを見てきた．
+ここでは， Galois 接続のうち \textbf{Galois 挿入} (Galois insertion) と呼ばれるものの定義と具体例，性質について見ていく．
+
+\begin{boxdefinition}{Galois 挿入}{galois-insertion}
+  $(L, \alpha, \gamma, M)$ が Galois 接続であって，
+
+  $$
+    \alpha \circ \gamma = \operatorname{id}_M
+  $$
+
+  であるとき $(L, \alpha, \gamma, M)$ が \textbf{Galois 挿入} (Galois insertion) であるという．
+\end{boxdefinition}
+
+このような $(L, \alpha, \gamma, M)$ は，存在する．
+
+たとえば \ref{ex:galois-connection-example} 節で紹介した
+
+
+\begin{align*}
+  L         & = (\mathcal{P}(\mathbb{Z}), \subseteq)                                    \\
+  M         & = (\textbf{Interval}, \leq_i)                                             \\
+  \alpha(l) & = \begin{cases}
+                  \bot \quad                           & \text{if } l = \emptyset \\
+                  [\mathrm{inf'}(l), \mathrm{sup'}(l)] & \text{otherwise}
+                \end{cases}         \\
+  \gamma(m) & = \{ z \in \mathbb{Z} \mid \mathrm{inf}(m) \leq z \leq \mathrm{sup}(m) \} \\
+\end{align*}
+
+は Galois 挿入である．
+
+Galois 接続であって Galois 挿入でないものも存在する．
+
+\begin{align*}
+  V & = \mathbb{Z}                           \\
+  D & = \textbf{Sign} \times \textbf{Parity}
+\end{align*}
+
+とする．ここで， extraction function $\eta: V \to D$ を
+$$
+  \eta(z) = (\operatorname{sign}(z), \operatorname{parity}(z))
+$$
+
+によって定めれば，
+
+\begin{align*}
+  L          & = (\mathcal{P}(V), \subseteq)                                                  \\
+  M          & = (\mathcal{P}(D), \subseteq)                                                  \\
+  \alpha(V') & = \{ (\operatorname{sign}(v), \operatorname{parity}(v)) \mid v \in V' \}       \\
+  \gamma(D') & = \{ v \in V \mid (\operatorname{sign}(v), \operatorname{parity}(v)) \in D' \}
+\end{align*}
+
+は Galois 接続 $(L, \alpha, \gamma, M)$ をなす．
+
+しかし $\{ (\mathord{0}, \mathord{odd}) \} \in M$ に対して
+
+\begin{align*}
+  \alpha(\gamma(\{ (\mathord{0}, \mathord{odd}) \})) & = \alpha( \emptyset )                   \\
+                                                     & = \emptyset                             \\
+                                                     & \neq \{ (\mathord{0}, \mathord{odd}) \}
+\end{align*}
+
+なので， $(L, \alpha, \gamma, M)$ は Galois 挿入ではない．
+
+\subsubsection{Galois 挿入の直感的な理解}
+
+二つ目の例では，対応する具体的な値がないような「余分な」抽象領域の存在によって Galois 挿入とならなかった．
+Galois 挿入は，このような「余分な」抽象領域が存在しないような Galois 接続であると直感的に理解できる．
+そのことをはっきり示すような諸性質を以下に示す．
+
+\subsubsection{Galois 挿入の性質}
+
+Galois 挿入 $(L, \alpha, \gamma, M)$ について，以下の性質が成り立つ．
+
+\begin{boxtheorem}{Galois 挿入の性質}{galois-insertion-properties}
+  Galois 接続 $(L, \alpha, \gamma, M)$ について，以下は同値．
+
+  \begin{enumerate}[label=\roman*.]
+    \item $(L, \alpha, \gamma, M)$ が Galois 挿入
+    \item $\gamma$ が単射
+    \item $\alpha$ が全射
+    \item $\gamma$ は順序を保存する: $\forall m_1, m_2 \in M, \gamma(m_1) \leq_L \gamma(m_2) \implies m_1 \leq_M m_2$
+  \end{enumerate}
+\end{boxtheorem}
+
+\paragraph*{証明}
+
+\begin{proofpart}{(\romannum{1}) $\implies$ (\romannum{2})}
+
+  $m_1, m_2 \in M$ に対して，
+
+  \begin{align*}
+    \gamma(m_1) = \gamma(m_2) & \implies \alpha(\gamma(m_1)) = \alpha(\gamma(m_2))                                           \\
+                              & \implies m_1 = m_2                                 & \text{(Definition of Galois insertion)} \\
+  \end{align*}
+
+  よって $\gamma$ は単射である．
+
+\end{proofpart}
+
+\begin{proofpart}{(\romannum{2}) $\implies$ (\romannum{3})}
+
+  $m \in M$ に対して, 定理 \ref{thm:galois-connection-circ-identity} から $\gamma(\alpha(\gamma(m))) = \gamma(m)$.
+  ここで $\gamma$ の単射性から $\alpha(\gamma(m)) = m$ がしたがう．したがって各 $m \in M$ に対して $l \ ( = \gamma(m))$ が存在して $\alpha(l) = m$ となるので $\alpha$ は全射である．
+
+\end{proofpart}
+
+\begin{proofpart}{(\romannum{3}) $\implies$ (\romannum{4})}
+
+  $m_1 \leq_M m_2 \implies \gamma(m_1) \leq_L \gamma(m_2)$ は $\gamma$ の単調性からただちにしたがう．
+
+  $\gamma(m_1) \leq_L \gamma(m_2) \implies m_1 \leq_M m_2$ を示そう．
+
+  仮定 (\romannum{3}) から $\alpha(l_1) = m_1$, $\alpha(l_2) = m_2$ なるような $l_1, l_2 \in L$ が存在する．
+  定理 \ref{thm:galois-adjoint} を $l \leftarrow l_1, m \leftarrow m_1$ として使うと
+
+  $$
+    \alpha(l_1) = m_1 \leq_M m_1 \iff l_1 \leq_L \gamma(m_1)
+  $$
+
+  よって $\leq_L$ の推移性から
+
+  $$
+    \gamma(m_1) \leq_L \gamma(m_2) \implies l_1 \leq_L \gamma(m_2)
+  $$
+
+  ここで $l_1 \leq_L \gamma(m_2)$ に対してもふたたび 定理 \ref{thm:galois-adjoint} を
+  $l \leftarrow l_1, m \leftarrow m_2$ として使うと
+  $$
+    l_1 \leq_L \gamma(m_2) \iff \alpha(l_1) \leq_M m_2 \iff m_1 \leq_M m_2
+  $$
+
+  なので，結局 $\gamma(m_1) \leq_L \gamma(m_2) \implies m_1 \leq_M m_2$．
+
+\end{proofpart}
+
+\begin{proofpart}{(\romannum{4}) $\implies$ (\romannum{1})}
+
+  \begin{align*}
+    \alpha(\gamma(m_1)) \leq_M m_2
+     & \iff \gamma(m_1) \leq_L \gamma(m_2) & \text{(Theorem \ref{thm:galois-adjoint})} \\
+     & \iff m_1 \leq_M m_2                 & \text{(Assumption of (\romannum{4}))}
+  \end{align*}
+
+  よってとくに $m2 \leftarrow \alpha(\gamma(m_1))$, $m_1 \leftarrow m_2$ を考えれば
+
+  $$
+    \alpha(\gamma(m_1)) = m_1
+  $$
+
+  がしたがう．
+
+\end{proofpart}
+
+これらから (\romannum{1}) $\iff$ (\romannum{2}) $\iff$ (\romannum{3}) $\iff$ (\romannum{4}) が成り立つことがわかる．
+
+
+\qed
+
+\subsection{reduction operator による Galois 挿入の構成}
+
+先ほど示したような条件を満たすような Galois 接続が Galois 挿入であることがわかった．
+ではこれらの条件を満たすように Galois 接続から Galois 挿入を構成することはできるだろうか？
+
+直感的には，「余分な」抽象領域を削除すれば構成できそうである．
+つまり:
+
+\begin{boxproposition}{reduction operatorによるGalois挿入の構成}{galois-insertion-reduction}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$ と $\alpha: L \to M$ が Galois 接続 $(L, \alpha, \gamma, M)$ をなすとき
+  $\varsigma: M \to M$ を
+
+  $$
+    \varsigma(m) = \bigsqcap \{m' \mid \gamma(m') = \gamma(m)\}
+  $$
+
+  と定める．このとき
+
+  $\varsigma [ M ] = (\{ \varsigma(m) \mid m \in M \}, \leq_M)$ は完備束であり，
+  $(L, \alpha, \gamma, \varsigma [ M ])$ は Galois 挿入をなす．
+\end{boxproposition}
+
+
+\paragraph*{例}
+
+\begin{align*}
+  L          & = (\mathcal{P}(\mathbb{Z}), \subseteq)                                         \\
+  M          & = (\mathcal{P}(\textbf{Sign} \times \textbf{Parity}), \subseteq)               \\
+  \alpha(V') & = \{ (\operatorname{sign}(v), \operatorname{parity}(v)) \mid v \in V' \}       \\
+  \gamma(D') & = \{ v \in V \mid (\operatorname{sign}(v), \operatorname{parity}(v)) \in D' \}
+\end{align*}
+
+について，
+
+$\varsigma: M \to M$ は
+
+\begin{align*}
+  \varsigma(m) & = \bigcap \{ m' \in M \mid \gamma(m') = \gamma(m) \}
+\end{align*}
+
+例えば:
+
+\begin{align*}
+  \varsigma(\{ (\mathord{+}, \mathord{even}) \}) & = \bigcap \{ m' \in M \mid \gamma(m') = \{2, 4, 6, \ldots\} \} \\
+                                                 & = \bigcap \{ \{(\mathord{+}, \mathord{even})\} \}              \\
+                                                 & = \{ (\mathord{+}, \mathord{even}) \}                          \\
+\end{align*}
+
+\begin{align*}
+  \varsigma(\{ (\mathord{+}, \mathord{even}), (\mathord{+}, \mathord{odd}) \}) & = \bigcap \{ m' \in M \mid \gamma(m') = \{1, 2, 3, \ldots\} \}      \\
+                                                                               & = \bigcap \{ \{
+  (\mathord{+}, \mathord{even}),
+  (\mathord{+}, \mathord{odd})
+  \},
+  \{
+  (\mathord{+}, \mathord{even}),
+  (\mathord{+}, \mathord{odd}),
+  (\mathord{0}, \mathord{even})
+  \}
+  \}                                                                                                                                                 \\
+                                                                               & = \{ (\mathord{+}, \mathord{even}), (\mathord{+}, \mathord{odd}) \} \\
+\end{align*}
+
+
+定義から $\gamma( \{ S \}) = \emptyset$ になるような $S$ について， $\gamma(V \cap S) = \gamma(V)$ が成り立つ．
+しかし，最後の例にとくに注目すると，そのような $S$ が共通部分を取ることで「落とされ」るように働いていることがわかる．
+
+そして，\textbf{実際このような変換によって Galois 挿入が得られる．}ここからはそれを示していく．
+
+\begin{boxlemma}{$\alpha [ L ]$ と $(\text{Fix}(\alpha \circ \gamma), \leq_M)$ の一致}{galois-connection-alpha-fix}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$ と
+  $\alpha: L \to M$ が Galois 接続 $(L, \alpha, \gamma, M)$ をなすとき
+
+  $$
+    \alpha [ L ] = (\{ \alpha(l) \mid l \in L \}, \leq_M)
+  $$
+
+  と定める．このとき
+  $$
+    \alpha [ L ] = (\text{Fix}(\alpha \circ \gamma), \leq_M)
+  $$
+\end{boxlemma}
+
+\paragraph*{証明}
+
+
+\begin{proofpart}{($\alpha [ L ] \subseteq \text{Fix}(\alpha \circ \gamma)$)}
+  $m \in \alpha [ L ]$ をとる．
+  $m = \alpha(l)$ なる $l \in L$ が存在するので，
+  $\alpha(\gamma(m)) = \alpha(\gamma(\alpha(l)))$ とすることができる．
+  $\alpha(\gamma(\alpha(l))) = \alpha(l)$ なので結局 $\alpha(\gamma(m)) = m$ となり $m \in \text{Fix}(\alpha \circ \gamma)$．
+\end{proofpart}
+
+\begin{proofpart}{($\text{Fix}(\alpha \circ \gamma) \subseteq \alpha [ L ]$)}
+
+  $m \in \text{Fix}(\alpha \circ \gamma)$ をとる．
+  $\alpha(\gamma(m)) = m$ なので， $l = \gamma(m)$ なる $l$ が
+  $\alpha(l) = m$ となり $m \in \alpha [ L ]$．
+\end{proofpart}
+
+\qed
+
+\begin{boxlemma}{$\alpha \circ \gamma$ と $\varsigma$ の一致}{galois-connection-alpha-varsigma}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$ と
+  $\alpha: L \to M$, $\gamma: M \to L$ が Galois 接続 $(L, \alpha, \gamma, M)$ をなすとき
+  reduction operator $\varsigma(m) = \bigsqcap \{ m' \in M \mid \gamma(m') = \gamma(m) \}$ は
+  $\alpha \circ \gamma$ と一致する．
+\end{boxlemma}
+
+\paragraph*{証明}
+
+$S(m) = \{ m' \in M \mid \gamma(m') = \gamma(m) \}$ とする．
+
+このとき
+
+\begin{proofpart}{$\alpha(\gamma(m))$ は $S$ の下界である}
+  $s \in S(m)$ に対して
+
+  \begin{align*}
+    \gamma(s) = \gamma(m) & \implies \gamma(s) \leq_L \gamma(m)  & \text{(Reflexivity of $\leq_L$)}          \\
+                          & \implies \alpha(\gamma(m)) \leq_M  s & \text{(Theorem \ref{thm:galois-adjoint})} \\
+  \end{align*}
+
+  定義から任意の $s \in S(m)$ について $\gamma(s) = \gamma(m)$ なので， $\alpha(\gamma(m))$ は $S(m)$ の下界である．
+\end{proofpart}
+
+\begin{proofpart}{$\alpha(\gamma(m))$ は下界の中で最大}
+  $S$ の下界 $m' \in M$ をとる．定義から 任意の $s \in S(m)$ に対して $m' \leq_M s$.
+
+  そして
+  \begin{align*}
+    m' \leq_M s & \implies \gamma(m') \leq_L \gamma(s) & \text{(Monotonicity of $\gamma$)}         \\
+                & \implies \gamma(m') \leq_L \gamma(m) & \text{(Definition of $S$)}                \\
+                & \implies m' \leq_M \alpha(\gamma(m)) & \text{(Theorem \ref{thm:galois-adjoint})} \\
+  \end{align*}
+  したがって 任意の下界 $m' \in M$ に対して $m' \leq_M \alpha(\gamma(m))$ なので $\alpha(\gamma(m'))$ は $S(m)$ の下界の中で最大である．
+\end{proofpart}
+
+これらから $\alpha(\gamma(m)) = \bigsqcap S(m) = \varsigma(m)$．
+
+\qed
+
+\begin{boxlemma}{$\alpha [ L ]$ と $\varsigma [ M ]$ の一致}{galois-connection-alpha-varsigma2}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$ と
+  $\alpha: L \to M$, $\gamma: M \to L$ が Galois 接続 $(L, \alpha, \gamma, M)$ をなすとき
+  $\alpha [ L ]$ と $\varsigma [ M ]$ は一致する．
+\end{boxlemma}
+
+\paragraph*{証明}
+
+\begin{proofpart}{$\varsigma [ M ] \subseteq \alpha [ L ]$}  $\varsigma(m) = \alpha(\gamma(m))$ なので
+  $l = \gamma(m)$ なる $l$ が $\alpha(l) = m$ となり $m \in \alpha [ L ]$．
+\end{proofpart}
+
+
+\begin{proofpart}{$\alpha [ L ] \subseteq \varsigma [ M ]$}
+  $\alpha [ L ] = \text{Fix}(\alpha \circ \gamma)$ なので
+  $m \in \alpha [ L ]$ をとると $\varsigma(m) = m$．
+  よって $m \in \varsigma [ M ]$．
+\end{proofpart}
+
+これら 3 つの補題から次の重要な事実が得られる．
+
+\begin{boxtheorem}{$\alpha[ L ]$, $\varsigma[ M ]$ は完備束}{galois-connection-complete-bounds}
+  $\alpha[ L ]$ と $\varsigma[ M ]$ は完備束である．
+\end{boxtheorem}
+
+\paragraph*{証明}
+
+$\alpha \circ \gamma$ は単調関数の合成であるから $M$ 上の単調関数．
+したがって Knaster-Tarski の定理により $\text{Fix}(\alpha \circ \gamma)$ は完備束をなし，
+補題 \ref{lem:galois-connection-alpha-varsigma}, \ref{lem:galois-connection-alpha-varsigma2} により
+$\alpha [ L ]$, $\varsigma [ M ]$ も完備束となる．
+
+\begin{boxtheorem}{reduction operatorによるGalois挿入の構成}{galois-insertion-reduction2}
+  完備束 $(L, \leq_L)$, $(M, \leq_M)$ と $\alpha: L \to M$ が Galois 接続 $(L, \alpha, \gamma, M)$ をなすとき
+  $\varsigma: M \to M$ を
+
+  $$
+    \varsigma(m) = \bigsqcap \{m' \mid \gamma(m') = \gamma(m)\}
+  $$
+
+  と定める．このとき
+
+  $\varsigma [ M ] = (\{ \varsigma(m) \mid m \in M \}, \leq_M)$ は完備束であり，
+  $(L, \alpha, \gamma, \varsigma [ M ])$ は Galois 挿入をなす．
+\end{boxtheorem}
+
+\paragraph*{証明}
+
+定理 \ref{thm:galois-connection-complete-bounds} から $\varsigma [ M ]$ は完備束である．
+
+$(L, \alpha, \gamma, \alpha[ L ])$ が Galois 挿入であることから $(L, \alpha, \gamma, \varsigma [ M ])$ が Galois 挿入であることを示す．
+
+$\alpha[ L ] \subseteq M$ なので $(L, \alpha, \gamma, \alpha [ L ])$ は Galois 接続であることを保つ．
+
+さらに， $\alpha [ L ]$ の定義から $\alpha$ は全射である．
+よって定理 \ref{thm:galois-insertion-properties} により
+$(L, \alpha, \gamma, \alpha [ L ])$ は Galois 挿入をなす．
+
+よって $(L, \alpha, \gamma, \varsigma [ M ])$ も Galois 挿入である．
+
+\qed
+
+\subsection{extraction function によって定まる reduction operator}
+
+extraction function $\eta: V \to D$ が与えられたとき， reduction operator $\varsigma: M \to M$ がどのように定まるかを考察する．
+集合 $V, D$ と extraction function $\eta: V \to D$ が与えられたとき，
+extraction function $\eta$ によって定まる Galois 接続 $(L, \alpha_\eta, \gamma_\eta, M)$ を構成することができる．
+
+このとき， reduction operator $\varsigma_\eta: M \to M$ は
+
+\begin{align*}
+  \varsigma_\eta(D') & = \alpha(\gamma(D'))                                     \\
+                     & = \alpha\left( \{ v \in V \mid \eta(v) \in D' \} \right) \\
+                     & = \{ \eta(v) \mid v \in V, \eta(v) \in D' \}             \\
+                     & = D' \cap \eta [ V ]
+\end{align*}
+
+となる．$D$ のうち具体的な値によって記述されることがない部分を削除していることがわかる．
+
+
+\section{プログラム解析のためのGalois 接続のシステマティックな構成}
+
+\subsection{解析の設計例}
+
+\url{https://abap34.github.io/Systematic-Design-of-Galois-Connections}
+
+\subsection{環境，意味論の抽象化}
+
+\begin{boxtheorem}{$S$ から $L$, $M$ への写像全体がなす Galois 接続}{galois-connection-maps}
+  Galois 接続 $(L, \alpha, \gamma, M)$ と 集合 $S$ に対して，
+  $\alpha': (S \to L) \to (S \to M)$,$\gamma': (S \to M) \to (S \to L)$を
+
+  \begin{align*}
+    \alpha'(f) & = \alpha \circ f \\
+    \gamma'(g) & = \gamma \circ g
+  \end{align*}
+
+  $S \to L$ と $S \to M$上 の順序 $\leq_{S \to L}$, $\leq_{S \to M}$ を
+
+  \begin{align*}
+    f \leq_{S \to L} f' & \iff \forall s \in S, f(s) \leq_L f'(s) \\
+    g \leq_{S \to M} g' & \iff \forall s \in S, g(s) \leq_M g'(s)
+  \end{align*}
+
+  によって定めれば $(S \to L, \leq_{S \to L})$ と $(S \to M, \leq_{S \to M})$ は半順序であって
+  $(S \to L, \alpha', \gamma', S \to M)$ は Galois 接続．
+\end{boxtheorem}
+
+\paragraph*{証明}
+
+$\alpha'$, $\gamma'$ は全域．
+
+
+$f \in S \to L, g \in S \to M$ に対して
+
+\begin{align*}
+  \alpha'(f) \leq_{S \to M} g & \iff \forall s \in S, \alpha(f(s)) \leq_M g(s) & \text{(Definition of $\leq_{S \to M}$)}                 \\
+                              & \iff \forall s \in S, f(s) \leq_L \gamma(g(s)) & \text{( $(L, \alpha, \gamma, M)$ is Galois connection)} \\
+                              & \iff f \leq_{S \to L} \gamma'(g)               & \text{(Definition of $\leq_{S \to L}$)}                 \\
+  \\
+\end{align*}
+
+より， \ref{thm:galois-adjoint} から $(S \to L, \alpha', \gamma', S \to M)$ は Galois 接続．
+
+
+\begin{boxtheorem}{Galois 接続間の単調関数がなす Galois 接続}{galois-connection-maps2}
+
+
+  Galois 接続 $(L_1, \alpha_1, \gamma_1, M_1)$ と $(L_2, \alpha_2, \gamma_2, M_2)$ に対して
+
+  $\mathcal{F}_L$ を $L_1 \to L_2$ の単調写像全体の集合，$\mathcal{F}_M$ を $M_1 \to M_2$ の単調写像全体の集合として，
+  $\alpha: \mathcal{F}_L \to \mathcal{F}_M$, $\gamma: \mathcal{F}_M \to \mathcal{F}_L$ を
+
+  \begin{align*}
+    \alpha(f) & = \alpha_2 \circ f \circ \gamma_1 \\
+    \gamma(g) & = \gamma_2 \circ g \circ \alpha_1
+  \end{align*}
+
+  と定めたとき
+  $(\mathcal{F}_L, \alpha, \gamma, \mathcal{F}_M)$ は Galois 接続．
+\end{boxtheorem}
+
+\paragraph*{証明}
+
+
+$\alpha_1$, $\gamma_1$, $\alpha_2$, $\gamma_2$ の単調性から $\alpha$, $\gamma$ も単調．
+
+$l_1 \in L_1$, $f \in \mathcal{F}_L$ に対して
+
+\begin{align*}
+  l_1              & \leq_{L_1} \gamma_1(\alpha_1(l_1))              & \text{($(L_1, \alpha_1, \gamma_1, M_1)$ is Galois connection)} \\
+  \implies  f(l_1) & \leq_{L_2} f(\gamma_1(\alpha_1(l_1)))           & \text{(Monotonicity of $f$)}                                   \\
+                   & \leq_{L_2} \gamma_2(\alpha_2(f(\gamma_1(\alpha_1(l_1))))) & \text{($(L_2, \alpha_2, \gamma_2, M_2)$ is Galois connection)} \\
+\end{align*}
+
+よって $\forall f \in \mathcal{F}_L, f \leq_{\mathcal{F}_L} \gamma(\alpha(f))$．
+
+同様に,
+
+$m_1 \in M_1$, $g \in \mathcal{F}_M$ に対して
+
+\begin{align*}
+  m_1              & \geq_{M_1} \alpha_1(\gamma_1(m_1))              & \text{($(L_1, \alpha_1, \gamma_1, M_1)$ is Galois connection)} \\
+  \implies  g(m_1) & \geq_{M_2} g(\alpha_1(\gamma_1(m_1)))           & \text{(Monotonicity of $g$)}                                   \\
+                   & \geq_{M_2} \alpha_2(\gamma_2(g(\alpha_1(\gamma_1(m_1))))) & \text{($(L_2, \alpha_2, \gamma_2, M_2)$ is Galois connection)} \\
+\end{align*}
+
+となり $\forall g \in \mathcal{F}_M, \alpha(\gamma(g)) \leq_{\mathcal{F}_M} g$．
+
+したがって $(\mathcal{F}_L, \alpha, \gamma, \mathcal{F}_M)$ は Galois 接続．
+
+
+
+
+
+
+\end{document}
